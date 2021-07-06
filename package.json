@@ -1,0 +1,35 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "devstart": "nodemon app.js",
+    "test": "mocha --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hansenwuwu/url-shortener.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hansenwuwu/url-shortener/issues"
+  },
+  "homepage": "https://github.com/hansenwuwu/url-shortener#readme",
+  "dependencies": {
+    "cli": "^1.0.1",
+    "express": "^4.17.1",
+    "joi": "^17.4.0",
+    "mongoose": "^5.13.2",
+    "nanoid": "^3.1.23",
+    "valid-url": "^1.0.9"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
+    "mocha": "^9.0.2",
+    "nodemon": "^2.0.9"
+  }
+}
