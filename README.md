@@ -6,6 +6,7 @@
 - valid-url: for url validation
 - nanoid: for generating none duplicate id 
 - joi: for data validation
+- redis: cache
 
 ## Test
 ```

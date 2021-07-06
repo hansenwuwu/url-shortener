@@ -6,6 +6,10 @@ const { customAlphabet } = require('nanoid');
 const alphabet = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const nanoid = customAlphabet(alphabet, 6);
 
+// redis
+const redis = require("redis");
+const client = redis.createClient(6379);
+
 router.post('/', async (req, res) => {
     const validation = await create_url_validation(req.body);
     if (validation.error) return res.status(400).send(validation.error.details[0].message);
@@ -37,6 +41,7 @@ router.post('/', async (req, res) => {
         }
 
         var p = await urlModel.create({ shortURL: url_id, originalURL: url, expireAt: expireAt });
+        client.setex(p.shortURL, 3600, JSON.stringify(p));
         return res.status(201).send({
             url_id: p.shortURL,
             shortUrl: `http:localhost:3000/${p.shortURL}`

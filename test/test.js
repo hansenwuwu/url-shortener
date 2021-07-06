@@ -22,15 +22,15 @@ describe("URL shortener testing", () => {
 
     describe("upload url", () => {
         it("should return 200", (done) => {
-            let t = new Date();
+            let t = "2021-07-08T12:20:59.574Z";
             chai.request(app)
                 .post('/api/v1/urls')
                 .send({
                     'url': 'google.com',
-                    'expireAt': t.toISOString()
+                    'expireAt': t
                 })
                 .end((err, res) => {
-                    res.should.have.status(200);
+                    res.should.have.status(201);
                     done();
                 });
         });
