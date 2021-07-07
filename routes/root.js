@@ -4,7 +4,13 @@ const { shorturl_validation } = require('../tools/validate');
 
 // redis
 const redis = require("redis");
-const client = redis.createClient(6379);
+let client;
+if (process.env.REDIS_URL) {
+    client = redis.createClient(process.env.REDIS_URL);
+}
+else {
+    client = redis.createClient(6379);
+}
 
 router.get('/', (req, res) => {
     res.send(`Hs's URL shortener`)

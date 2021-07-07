@@ -59,7 +59,7 @@
 - redis
 
 ## To-do
-- check url_id is unique
+- docker manual
 
 ## package
 - express: backend framework
