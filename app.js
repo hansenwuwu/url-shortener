@@ -10,13 +10,14 @@ const {
     MONGO_PASSWORD,
     MONGO_HOSTNAME,
     MONGO_PORT,
+    MONGO_DB,
     REDIS_URL
 } = process.env;
 
 // mongodb
 var mongoose = require('mongoose');
 if (PUBLISH == 'publish') {
-    const url = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOSTNAME}:${MONGO_PORT}`;
+    const url = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOSTNAME}:${MONGO_PORT}/${MONGO_DB}?authSource=admin`;
     mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
 }
 else {

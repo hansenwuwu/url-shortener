@@ -18,4 +18,4 @@ var urlModelSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('urls', urlModelSchema);
+module.exports = mongoose.model('urls', urlModelSchema, 'urls');
