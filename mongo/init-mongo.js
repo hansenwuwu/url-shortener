@@ -1,12 +1,15 @@
-db = new Mongo().getDB("testDB");
+db = new Mongo().getDB("urlshortener");
 
-db.createCollection('users', { capped: false });
-db.createCollection('test', { capped: false });
+db.createCollection('pools', { capped: false });
 
-db.test.insert([
-    { "item": 1 },
-    { "item": 2 },
-    { "item": 3 },
-    { "item": 4 },
-    { "item": 5 }
-]);
+let count = 0;
+while (count < 500) {
+    let url_id = "";
+    while (true) {
+        url_id = nanoid();
+        var r = await db.pools.find_one({ url_id: url_id });
+        if (r === null) break;
+    }
+    await db.pools.insert({ url_id: url_id });
+    count++;
+}
