@@ -10,4 +10,4 @@ var urlPoolSchema = new Schema({
     }
 });
 
-module.exports = mongoose.model('pool', urlPoolSchema);
+module.exports = mongoose.model('pools', urlPoolSchema);
