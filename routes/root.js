@@ -22,14 +22,14 @@ router.get('/:url_id', cache, async (req, res) => {
             // if expire delete this data
             if (date - Date.now() <= 0) {
                 var r = await urlModel.deleteOne({ shortURL: req.params.url_id });
-                return res.status(404).send('url has been expired');
+                return res.status(400).send('url has been expired');
             }
             client.setex(r.shortURL, 3600, JSON.stringify(r));
             return res.redirect(r.originalURL);
         }
         else {
             client.setex(req.params.url_id, 3600, '');
-            return res.status(404).send('no such url');
+            return res.status(400).send('no such url');
         }
     }
     catch (err) {

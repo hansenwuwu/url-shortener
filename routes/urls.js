@@ -1,5 +1,6 @@
 const router = require('express').Router();
 var urlModel = require('../models/urlModel');
+var poolModel = require('../models/urlPool');
 var validUrl = require('valid-url');
 const { create_url_validation } = require('../tools/validate');
 const { customAlphabet } = require('nanoid');
@@ -31,14 +32,20 @@ router.post('/', async (req, res) => {
         // check shortURl is unique
         // probability for duplication will be 1% a day
         // reference: https://zelark.github.io/nano-id-cc/
-        let url_id = nanoid();
-        let count = 0;
-        while (count < 100) {
-            count++;
-            url_id = nanoid();
-            var r = await urlModel.findOne({ shortURL: url_id });
-            if (r == null) break;
-        }
+        // let url_id = nanoid();
+        // let count = 0;
+        // while (count < 100) {
+        //     count++;
+        //     url_id = nanoid();
+        //     var r = await urlModel.findOne({ shortURL: url_id });
+        //     if (r == null) break;
+        // }
+        // if (count >= 100) {
+        //     return res.status(500).send('url_id collision rate too high');
+        // }
+
+        var r = await poolModel.findOneAndDelete({});
+        let url_id = r.url_id;
 
         var p = await urlModel.create({ shortURL: url_id, originalURL: url, expireAt: expireAt });
         client.setex(p.shortURL, 3600, JSON.stringify(p));
