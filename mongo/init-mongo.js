@@ -1,4 +1,4 @@
-db = new Mongo().getDB("urlshortener");
+db = new Mongo().getDB("url_db");
 
 db.createCollection('pools', { capped: false });
 

@@ -17,6 +17,31 @@ else {
     client = redis.createClient(6379);
 }
 
+/**
+ * @openapi
+ * /api/v1/urls:
+ *   post:
+ *     summary: upload long url
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 description: long url
+ *                 example: https://www.google.com
+ *               expireAt:
+ *                 type: string
+ *                 description: expire date time in iso format
+ *                 example: 2021-07-07T08:55:29.921Z
+ *     responses:
+ *       201:
+ *         description: Returns a url_id.
+ */
+
 router.post('/', async (req, res) => {
     const validation = await create_url_validation(req.body);
     if (validation.error) return res.status(400).send(validation.error.details[0].message);

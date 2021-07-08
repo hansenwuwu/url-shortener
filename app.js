@@ -2,7 +2,28 @@ const express = require('express')
 const app = express()
 const port = 3000
 
-const { create_url_id } = require('./tools/pool');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
+
+const options = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "URL shortener API",
+            version: "1.0.0",
+            description: ""
+        },
+        servers: [
+            {
+                url: "http://localhost:3000"
+            }
+        ],
+    },
+    apis: ["./routes/*.js"]
+}
+
+const specs = swaggerJsDoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 const {
     PUBLISH,
@@ -10,8 +31,7 @@ const {
     MONGO_PASSWORD,
     MONGO_HOSTNAME,
     MONGO_PORT,
-    MONGO_DB,
-    REDIS_URL
+    MONGO_DB
 } = process.env;
 
 // mongodb
@@ -21,7 +41,7 @@ if (PUBLISH == 'publish') {
     mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
 }
 else {
-    var mongoDB = 'mongodb://127.0.0.1/urlshortener';
+    var mongoDB = 'mongodb://127.0.0.1/url_db';
     mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 }
 var db = mongoose.connection;
@@ -34,18 +54,6 @@ app.use(express.json());
 
 app.use('/', rootRoute);
 app.use('/api/v1/urls', urlsRoute);
-
-// async function startup() {
-//     console.log('creating unique url_id ...');
-//     await create_url_id();
-//     console.log('unique url_id created!');
-
-//     app.listen(port, async () => {
-//         console.log(`Example app listening at http://localhost:${port}`);
-//     })
-// }
-
-// startup();
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
