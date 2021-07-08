@@ -13,8 +13,8 @@
 - Docker
 - Docker compose
 
-### Ubuntu, MacOS
-1. pull 此專案
+### Ubuntu, MacOS, Windows
+1. clone repository
 ```
 $ git clone https://github.com/hansenwuwu/url-shortener.git
 ```
@@ -22,14 +22,15 @@ $ git clone https://github.com/hansenwuwu/url-shortener.git
 ```
 $ docker-compose up -d
 ```
+3. 可至 http://localhost:3000/api-docs 測試 API ~
 
 ## 問題探討
 ### 如何產生獨特的 url_id (6位數的字串，包含[A-Za-z0-9])
-- <b>方法一:</b> 使用 nanoid (產生隨機字串的套件) 產生隨機 url_id，比對資料庫中有無重複。如果有，則再產生一組新的 url_id，反覆檢查直到無重複為止。
+- 方法一: 使用 nanoid (產生隨機字串的套件) 產生隨機 url_id，比對資料庫中有無重複。如果有，則再產生一組新的 url_id，反覆檢查直到無重複為止。
     - 可能問題：
         1. 低使用量的情況下，隨機產生的 url_id 幾乎不會有重複。但在使用量變高時，重複的機率就會跟著提高，導致檢查重複次數增加。
         2. 在高流量下，有機會發生類似 Race condition 的問題。例如：在兩個請求同時發生，同時隨機產生了同一組 url_id，同時檢查都沒有重複，就會都使用了同一組 url_id，是不能被接受的狀況。
-- <b>方法二(此專案使用):</b> 事先在資料庫中產生多組獨特的 url_id 作為可用名單。當需要時可以從這個名單內取出來使用，並在取出後刪掉此 url_id，當作是被使用過了！
+- 方法二(此專案使用): 事先在資料庫中產生多組獨特的 url_id 作為可用名單。當需要時可以從這個名單內取出來使用，並在取出後刪掉此 url_id，當作是被使用過了！
     - 改良重點:
         1. 使用 mongodb 的 findOneAndDelete 的 atomic function 特性，確保從名單拿取時，可以拿到獨特的 url_id，並且同時移除此紀錄，讓其他請求不會同被拿到。改善了方法一的 race condition 問題。
         2. 方法一在高使用量時，容易產生重複的 url_id ，資料庫負擔也會因此增加。此方法只需對資料庫做一次存取刪除，並定能拿到取得獨特 url_id。
@@ -39,31 +40,35 @@ $ docker-compose up -d
         1. 在 demo 中，只有預先產生 500 組，但在使用量高的情況下，500 組絕對不夠用。因此需要有一個額外的 service 來專門產生獨特的 url_id。在需要 url_id 時，找這個 service 請求一個。並且在不夠用時，產生出更多 url_id 備著。
 
 ### cache 機制
+使用 redis 將 GET API 的結果做暫存，減輕主資料庫(MongoDB)的負擔。
+- 使用者頻繁存取某些"有效"縮網址
+    - 如果 redis 中沒有紀錄: 到 MongoDB 找，找到後放進 redis。
+    - 如果 redis 中有此紀錄:
+        - 檢查是否到期:
+            - 無到期: 直接回傳結果，不需耗費主資料庫(MongoDB)資源。
+            - 到期: 刪除 redis 中的這份紀錄，回傳 404。
+
+- 使用者頻繁存取某些"無效"縮網址
+    - 如果 redis 中沒有紀錄: 到 MongoDB 找，找到後發現是無效的縮網址，將這筆標示為無效存到 redis 中。
+    - 如果 redis 中有此紀錄: 直接回傳 404。
+    - 後續此縮網址變為有效時，會在 POST API 同時更新 redis 這筆資料。
 
 ## API 與設計理念
 1. http://localhost/api/v1/urls
-* 功能描述：上傳 long url，server 將 long url 對應至一個 unique 的 url_id，並且回傳 url_id。
-* 詳細流程：
-    1. <b>檢查 url</b> 是否為大於 1 位數的 string。<b>檢查 expireAt</b> 是否為 iso 格式，並且時間大於現在時間。
-        * Error handle: 回傳錯誤的資料欄位，status code 400。
-    2. <b>檢查 url 是否為 http 或 https 開頭</b>。
-        * Error handle: 若 url 無此兩種開頭，則自動加上 "http://" 在 url 前方，此 url 是給後續轉址做使用，因此必須帶有 http 或 https 以區別是否為外部 url。
-    3. <b>檢查 url 是否為合理的網址</b>。
-        * Error handle: 若不合理則回傳 invalid url，status code 400。
-    4. <b>取得獨一無二的 url_id 給 url 去對應</b>。(如何取得獨一無二的 url_id 見後方詳細描述！)
-    5. <b>建立 url_id, url, expireAt 的資料到 mongodb 中</b>。
-    5. <b>建立完後回傳 url_id 與完整網址</b>。
+  - 功能描述: 上傳 url，server ，將其對應至一個 unique 的 url_id，並且回傳。
+  - 詳細流程:
+    1. 檢查 url 是否合理。自動加上 http:// ，如果沒有包含http, https在開頭的話。(後續 redirect 來區別外部 URL)
+    2. 檢查 expireAt 是否為 iso 格式，並且時間大於現在時間。
+    3. 匹配一個獨特的 url_id 給此 URL，儲存到資料庫中。
+    6. 回傳 url_id 與完整縮網址。
 
 2. http://localhost/<url_id>
-* 功能描述：透過 url_id，轉址到其對應的 long url。
-* 詳細流程：
-    1. <b>檢查 url_id</b> 是否為 6 位數的 string。(在此 homework，我將 url_id 固定為 6 位數)
-        * Error handle: 回傳錯誤的資料欄位，status code 400。
-    2. <b>檢查 database 中是否有 url_id 這筆資料</b>。
-        * Error handle: 回傳 no such url，status code 400。
-    3. <b>檢查 url_id 這筆資料的 expire date 是否到期</b>。如果到期，則將此筆資料刪除。
-        * Error handle: 回傳 url has been expired，status code 400。
-    4. <b>將網址 redirect 到 url_id 對應到的 url</b>(long url/original url)。
+  - 功能描述: 透過縮網址，訪問其對應的 URL。
+  - 詳細流程:
+    1. 檢查 url_id 是否為 6 位數的 string。(在此 demo，將 url_id 設定為 6 位數)
+    2. 檢查資料庫中是否有這筆資料。
+    3. 檢查這筆資料的 expire date 是否到期。如果到期，則將此筆資料刪除。
+    4. 將網址 redirect 到 url_id 對應到的 url(long url/original url)。
 
 ## Testing tool
 - mocha
@@ -71,7 +76,7 @@ $ docker-compose up -d
 - chai-http
 
 ## To-do
-- docker manual
+- testing
 
 ## Package usage
 - Express: web backend framework
