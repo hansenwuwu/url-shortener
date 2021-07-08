@@ -81,12 +81,11 @@ router.post('/', async (req, res) => {
         var p = await urlModel.create({ shortURL: url_id, originalURL: url, expireAt: expireAt });
         client.setex(p.shortURL, 3600, JSON.stringify(p));
         return res.status(201).send({
-            url_id: p.shortURL,
+            id: p.shortURL,
             shortUrl: `http:localhost:3000/${p.shortURL}`
         });
     }
     catch (err) {
-        console.log(err);
         return res.status(500).send(err);
     }
 })

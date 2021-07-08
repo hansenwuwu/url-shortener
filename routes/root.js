@@ -13,7 +13,7 @@ else {
 }
 
 router.get('/', (req, res) => {
-    res.redirect('https://google.com');
+    res.send('Hi, this is a URL shortener demo');
 })
 
 router.get('/:url_id', cache, async (req, res) => {
