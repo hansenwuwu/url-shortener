@@ -24,7 +24,7 @@ $ docker-compose up -d
 ```
 3. 可至 http://localhost:3000/api-docs 測試 API ~
 
-## 問題探討
+## 主要問題探討
 ### 如何產生獨特的 url_id (6位數的字串，包含[A-Za-z0-9])
 - 方法一: 使用 nanoid (產生隨機字串的套件) 產生隨機 url_id，比對資料庫中有無重複。如果有，則再產生一組新的 url_id，反覆檢查直到無重複為止。
     - 可能問題：
@@ -53,7 +53,7 @@ $ docker-compose up -d
     - 如果 redis 中有此紀錄: 直接回傳 404。
     - 後續此縮網址變為有效時，會在 POST API 同時更新 redis 這筆資料。
 
-## API 與設計理念
+## API
 1. http://localhost/api/v1/urls
     - 功能描述: 上傳 url，server ，將其對應至一個 unique 的 url_id，並且回傳。
     - 詳細流程:
@@ -69,6 +69,27 @@ $ docker-compose up -d
         2. 檢查資料庫中是否有這筆資料。
         3. 檢查這筆資料的 expire date 是否到期。如果到期，則將此筆資料刪除。4
         4. 將網址 redirect 到 url_id 對應到的 url(long url/original url)。
+
+## 原始碼使用方法
+### Requirement
+- Node.js
+- MongoDB
+- Redis
+
+###
+1. clone repository
+```
+$ git clone https://github.com/hansenwuwu/url-shortener.git
+```
+2. run
+```
+$ npm install
+$ npm start
+```
+3. testing
+```
+npm run test
+```
 
 ## Package usage
 - Express: web backend framework
