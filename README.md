@@ -55,20 +55,20 @@ $ docker-compose up -d
 
 ## API 與設計理念
 1. http://localhost/api/v1/urls
-  - 功能描述: 上傳 url，server ，將其對應至一個 unique 的 url_id，並且回傳。
-  - 詳細流程:
-    1. 檢查 url 是否合理。自動加上 http:// ，如果沒有包含http, https在開頭的話。(後續 redirect 來區別外部 URL)
-    2. 檢查 expireAt 是否為 iso 格式，並且時間大於現在時間。
-    3. 匹配一個獨特的 url_id 給此 URL，儲存到資料庫中。
-    6. 回傳 url_id 與完整縮網址。
+    - 功能描述: 上傳 url，server ，將其對應至一個 unique 的 url_id，並且回傳。
+    - 詳細流程:
+        1. 檢查 url 是否合理。自動加上 http:// ，如果沒有包含http, https在開頭的話。(後續 redirect 來區別外部 URL)
+        2. 檢查 expireAt 是否為 iso 格式，並且時間大於現在時間。
+        3. 匹配一個獨特的 url_id 給此 URL，儲存到資料庫中。
+        4. 回傳 url_id 與完整縮網址。
 
 2. http://localhost/<url_id>
-  - 功能描述: 透過縮網址，訪問其對應的 URL。
-  - 詳細流程:
-    1. 檢查 url_id 是否為 6 位數的 string。(在此 demo，將 url_id 設定為 6 位數)
-    2. 檢查資料庫中是否有這筆資料。
-    3. 檢查這筆資料的 expire date 是否到期。如果到期，則將此筆資料刪除。
-    4. 將網址 redirect 到 url_id 對應到的 url(long url/original url)。
+    - 功能描述: 透過縮網址，訪問其對應的 URL。
+    - 詳細流程:
+        1. 檢查 url_id 是否為 6 位數的 string。(在此 demo，將 url_id 設定為 6 位數)
+        2. 檢查資料庫中是否有這筆資料。
+        3. 檢查這筆資料的 expire date 是否到期。如果到期，則將此筆資料刪除。4
+        4. 將網址 redirect 到 url_id 對應到的 url(long url/original url)。
 
 ## Testing tool
 - mocha
