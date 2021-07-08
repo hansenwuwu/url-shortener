@@ -98,7 +98,7 @@ npm run test
 - Nanoid: generating less duplicate rate url_id
 - Joi: request body/param validation tool
 - Mongoose: MongoDB ODM
-- Redis: redis package
+- Redis
 
 ## Testing tool
 - mocha
