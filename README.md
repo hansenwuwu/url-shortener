@@ -70,14 +70,6 @@ $ docker-compose up -d
         3. 檢查這筆資料的 expire date 是否到期。如果到期，則將此筆資料刪除。4
         4. 將網址 redirect 到 url_id 對應到的 url(long url/original url)。
 
-## Testing tool
-- mocha
-- chai
-- chai-http
-
-## To-do
-- testing
-
 ## Package usage
 - Express: web backend framework
 - Nodemon: development tool
@@ -86,3 +78,8 @@ $ docker-compose up -d
 - Joi: request body/param validation tool
 - Mongoose: MongoDB ODM
 - Redis: redis package
+
+## Testing tool
+- mocha
+- chai
+- chai-http
